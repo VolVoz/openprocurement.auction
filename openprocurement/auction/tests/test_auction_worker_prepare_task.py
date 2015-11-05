@@ -7,10 +7,11 @@ import datetime
 from dateutil.tz import tzlocal
 from ConfigParser import SafeConfigParser
 from mock import patch
+import subprocess
 from subprocess import call
 
 
-class PrepareTasksTests(unittest.TestCase):
+class TestPrepareTasks(unittest.TestCase):
 
     def setUp(self):
         self.worker_defaults = {
@@ -45,11 +46,15 @@ class PrepareTasksTests(unittest.TestCase):
         self.assertEqual(" ".join((self.test_argsv[0], "run",)), write_cmd)
 
     def tearDown(self):
+        FNULL = open(os.devnull, 'w')
         call(
-            ['/usr/bin/systemctl', '--user', 'disable', 'auction_test_id.timer'])
+            ['/usr/bin/systemctl', '--user', 'disable', 'auction_test_id.timer'],
+            stdout=FNULL, stderr=subprocess.STDOUT)
         os.remove(
             os.path.join(self.home_dir, '.config/systemd/user/auction_test_id.timer'))
         os.remove(
             os.path.join(self.home_dir, '.config/systemd/user/auction_test_id.service'))
         call(
-            ['/usr/bin/systemctl', '--user', 'daemon-reload'])
+            ['/usr/bin/systemctl', '--user', 'daemon-reload'],
+            stdout=FNULL, stderr=subprocess.STDOUT)
+        FNULL.close()
